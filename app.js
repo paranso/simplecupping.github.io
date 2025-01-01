@@ -1,10 +1,14 @@
 const SimpleCuppingForm = () => {
-   const [scores, setScores] = React.useState({
-       aroma: 3,
-       acidity: 3,
-       sweetness: 3,
-       body: 3,
-       aftertaste: 3
+   // 기존 상태 관리
+   const [scores, setScores] = React.useState(() => {
+       const saved = localStorage.getItem('cupping-scores');
+       return saved ? JSON.parse(saved) : {
+           aroma: 3,
+           acidity: 3,
+           sweetness: 3,
+           body: 3,
+           aftertaste: 3
+       };
    });
 
    const aromaWheel = {
@@ -16,19 +20,76 @@ const SimpleCuppingForm = () => {
        '초콜릿': ['다크초콜릿', '밀크초콜릿', '코코아', '초콜릿시럽', '모카']
    };
 
-   const [selectedAromas, setSelectedAromas] = React.useState([]);
-   const [expandedCategory, setExpandedCategory] = React.useState(null);
-   const [notes, setNotes] = React.useState('');
-   const [customNotes, setCustomNotes] = React.useState({
-       꽃: '',
-       과일류: '',
-       허브: '',
-       견과류: '',
-       캐러멜: '',
-       초콜릿: ''
+   // 상태 관리에 localStorage 적용
+   const [selectedAromas, setSelectedAromas] = React.useState(() => {
+       const saved = localStorage.getItem('cupping-selected-aromas');
+       return saved ? JSON.parse(saved) : [];
    });
-   const [roastingNotes, setRoastingNotes] = React.useState('');
+   
+   const [expandedCategory, setExpandedCategory] = React.useState(null);
+   
+   const [notes, setNotes] = React.useState(() => {
+       const saved = localStorage.getItem('cupping-notes');
+       return saved ? JSON.parse(saved) : '';
+   });
+   
+   const [customNotes, setCustomNotes] = React.useState(() => {
+       const saved = localStorage.getItem('cupping-custom-notes');
+       return saved ? JSON.parse(saved) : {
+           꽃: '',
+           과일류: '',
+           허브: '',
+           견과류: '',
+           캐러멜: '',
+           초콜릿: ''
+       };
+   });
+   
+   const [roastingNotes, setRoastingNotes] = React.useState(() => {
+       const saved = localStorage.getItem('cupping-roasting-notes');
+       return saved ? JSON.parse(saved) : '';
+   });
 
+   const [roastingDate, setRoastingDate] = React.useState(() => {
+       const saved = localStorage.getItem('cupping-roasting-date');
+       return saved ? JSON.parse(saved) : '';
+   });
+
+   const [cuppingDate, setCuppingDate] = React.useState(() => {
+       const saved = localStorage.getItem('cupping-date');
+       return saved ? JSON.parse(saved) : '';
+   });
+
+   // localStorage 자동 저장
+   React.useEffect(() => {
+       localStorage.setItem('cupping-scores', JSON.stringify(scores));
+   }, [scores]);
+
+   React.useEffect(() => {
+       localStorage.setItem('cupping-selected-aromas', JSON.stringify(selectedAromas));
+   }, [selectedAromas]);
+
+   React.useEffect(() => {
+       localStorage.setItem('cupping-notes', JSON.stringify(notes));
+   }, [notes]);
+
+   React.useEffect(() => {
+       localStorage.setItem('cupping-custom-notes', JSON.stringify(customNotes));
+   }, [customNotes]);
+
+   React.useEffect(() => {
+       localStorage.setItem('cupping-roasting-notes', JSON.stringify(roastingNotes));
+   }, [roastingNotes]);
+
+   React.useEffect(() => {
+       localStorage.setItem('cupping-roasting-date', JSON.stringify(roastingDate));
+   }, [roastingDate]);
+
+   React.useEffect(() => {
+       localStorage.setItem('cupping-date', JSON.stringify(cuppingDate));
+   }, [cuppingDate]);
+
+   // 기존 핸들러들
    const handleScoreChange = (category, value) => {
        setScores(prev => ({
            ...prev,
@@ -72,9 +133,86 @@ const SimpleCuppingForm = () => {
        aftertaste: '후미'
    };
 
+   // JSON 내보내기 함수
+   const exportToJson = () => {
+       const data = {
+           roastingDate,
+           cuppingDate,
+           scores,
+           selectedAromas,
+           customNotes,
+           notes,
+           roastingNotes
+       };
+       const dataStr = JSON.stringify(data);
+       const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+       const exportFileDefaultName = `cupping-note-${new Date().toISOString().slice(0,10)}.json`;
+
+       const linkElement = document.createElement('a');
+       linkElement.setAttribute('href', dataUri);
+       linkElement.setAttribute('download', exportFileDefaultName);
+       linkElement.click();
+   };
+
+   // JSON 불러오기 함수
+   const importFromJson = (event) => {
+       const file = event.target.files[0];
+       const reader = new FileReader();
+       reader.onload = (e) => {
+           const data = JSON.parse(e.target.result);
+           setRoastingDate(data.roastingDate);
+           setCuppingDate(data.cuppingDate);
+           setScores(data.scores);
+           setSelectedAromas(data.selectedAromas);
+           setCustomNotes(data.customNotes);
+           setNotes(data.notes);
+           setRoastingNotes(data.roastingNotes);
+       };
+       reader.readAsText(file);
+   };
+
+   // PDF 저장 함수
+   const savePDF = async () => {
+       const element = document.getElementById('cupping-form');
+       const canvas = await html2canvas(element);
+       const imgData = canvas.toDataURL('image/png');
+
+       const { jsPDF } = window.jspdf;
+       const pdf = new jsPDF('p', 'mm', 'a4');
+       const pdfWidth = pdf.internal.pageSize.getWidth();
+       const pdfHeight = pdf.internal.pageSize.getHeight();
+       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+       pdf.save(`cupping-note-${new Date().toISOString().slice(0,10)}.pdf`);
+   };
+
    return (
        <div className="container mx-auto px-4 py-8 max-w-2xl">
-           <div className="bg-white rounded-lg shadow-lg p-6">
+           {/* 저장 관련 버튼들 */}
+           <div className="mb-4 flex gap-2 justify-end">
+               <button 
+                   onClick={exportToJson}
+                   className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+               >
+                   JSON 내보내기
+               </button>
+               <label className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 cursor-pointer">
+                   JSON 불러오기
+                   <input
+                       type="file"
+                       accept=".json"
+                       onChange={importFromJson}
+                       className="hidden"
+                   />
+               </label>
+               <button 
+                   onClick={savePDF}
+                   className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+               >
+                   PDF 저장
+               </button>
+           </div>
+
+           <div id="cupping-form" className="bg-white rounded-lg shadow-lg p-6">
                <h1 className="text-2xl font-bold text-center mb-6">커피 커핑 폼</h1>
                
                {/* 기본 정보 */}
@@ -85,13 +223,17 @@ const SimpleCuppingForm = () => {
                            <label className="block text-sm font-medium mb-1">로스팅 날짜</label>
                            <input 
                                type="date" 
+                               value={roastingDate}
+                               onChange={(e) => setRoastingDate(e.target.value)}
                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                            />
                        </div>
                        <div>
                            <label className="block text-sm font-medium mb-1">커핑 날짜</label>
                            <input 
-                               type="date" 
+                               type="date"
+                               value={cuppingDate}
+                               onChange={(e) => setCuppingDate(e.target.value)}
                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                            />
                        </div>
