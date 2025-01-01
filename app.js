@@ -1,10 +1,13 @@
 const SimpleCuppingForm = () => {
-   const [scores, setScores] = React.useState({
-       aroma: 3,
-       acidity: 3,
-       sweetness: 3,
-       body: 3,
-       aftertaste: 3
+   const [scores, setScores] = React.useState(() => {
+       const savedScores = localStorage.getItem('coffeeScores');
+       return savedScores ? JSON.parse(savedScores) : {
+           aroma: 3,
+           acidity: 3,
+           sweetness: 3,
+           body: 3,
+           aftertaste: 3
+       };
    });
 
    const aromaWheel = {
@@ -16,18 +19,67 @@ const SimpleCuppingForm = () => {
        '초콜릿': ['다크초콜릿', '밀크초콜릿', '코코아', '초콜릿시럽', '모카']
    };
 
-   const [selectedAromas, setSelectedAromas] = React.useState([]);
-   const [expandedCategory, setExpandedCategory] = React.useState(null);
-   const [notes, setNotes] = React.useState('');
-   const [customNotes, setCustomNotes] = React.useState({
-       꽃: '',
-       과일류: '',
-       허브: '',
-       견과류: '',
-       캐러멜: '',
-       초콜릿: ''
+   const [selectedAromas, setSelectedAromas] = React.useState(() => {
+       const savedAromas = localStorage.getItem('selectedAromas');
+       return savedAromas ? JSON.parse(savedAromas) : [];
    });
-   const [roastingNotes, setRoastingNotes] = React.useState('');
+
+   const [expandedCategory, setExpandedCategory] = React.useState(null);
+   
+   const [notes, setNotes] = React.useState(() => {
+       const savedNotes = localStorage.getItem('notes');
+       return savedNotes || '';
+   });
+
+   const [customNotes, setCustomNotes] = React.useState(() => {
+       const savedCustomNotes = localStorage.getItem('customNotes');
+       return savedCustomNotes ? JSON.parse(savedCustomNotes) : {
+           꽃: '',
+           과일류: '',
+           허브: '',
+           견과류: '',
+           캐러멜: '',
+           초콜릿: ''
+       };
+   });
+
+   const [roastingNotes, setRoastingNotes] = React.useState(() => {
+       const savedRoastingNotes = localStorage.getItem('roastingNotes');
+       return savedRoastingNotes || '';
+   });
+
+   const [dates, setDates] = React.useState(() => {
+       const savedDates = localStorage.getItem('dates');
+       return savedDates ? JSON.parse(savedDates) : {
+           roastingDate: '',
+           cuppingDate: ''
+       };
+   });
+
+   // Save to localStorage whenever values change
+   React.useEffect(() => {
+       localStorage.setItem('coffeeScores', JSON.stringify(scores));
+   }, [scores]);
+
+   React.useEffect(() => {
+       localStorage.setItem('selectedAromas', JSON.stringify(selectedAromas));
+   }, [selectedAromas]);
+
+   React.useEffect(() => {
+       localStorage.setItem('notes', notes);
+   }, [notes]);
+
+   React.useEffect(() => {
+       localStorage.setItem('customNotes', JSON.stringify(customNotes));
+   }, [customNotes]);
+
+   React.useEffect(() => {
+       localStorage.setItem('roastingNotes', roastingNotes);
+   }, [roastingNotes]);
+
+   React.useEffect(() => {
+       localStorage.setItem('dates', JSON.stringify(dates));
+   }, [dates]);
 
    const handleScoreChange = (category, value) => {
        setScores(prev => ({
@@ -48,6 +100,13 @@ const SimpleCuppingForm = () => {
        setExpandedCategory(expandedCategory === category ? null : category);
    };
 
+   const handleDateChange = (type, value) => {
+       setDates(prev => ({
+           ...prev,
+           [type]: value
+       }));
+   };
+
    const getRecommendation = () => {
        let recommendations = [];
        
@@ -64,6 +123,32 @@ const SimpleCuppingForm = () => {
        return recommendations.join(' ');
    };
 
+   const clearAllData = () => {
+       localStorage.clear();
+       setScores({
+           aroma: 3,
+           acidity: 3,
+           sweetness: 3,
+           body: 3,
+           aftertaste: 3
+       });
+       setSelectedAromas([]);
+       setNotes('');
+       setCustomNotes({
+           꽃: '',
+           과일류: '',
+           허브: '',
+           견과류: '',
+           캐러멜: '',
+           초콜릿: ''
+       });
+       setRoastingNotes('');
+       setDates({
+           roastingDate: '',
+           cuppingDate: ''
+       });
+   };
+
    const scoreLabels = {
        aroma: '향',
        acidity: '산미',
@@ -75,7 +160,15 @@ const SimpleCuppingForm = () => {
    return (
        <div className="container mx-auto px-4 py-8 max-w-2xl">
            <div className="bg-white rounded-lg shadow-lg p-6">
-               <h1 className="text-2xl font-bold text-center mb-6">커피 커핑 폼</h1>
+               <div className="flex justify-between items-center mb-6">
+                   <h1 className="text-2xl font-bold">커피 커핑 폼</h1>
+                   <button
+                       onClick={clearAllData}
+                       className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+                   >
+                       초기화
+                   </button>
+               </div>
                
                {/* 기본 정보 */}
                <div className="mb-8">
@@ -85,6 +178,8 @@ const SimpleCuppingForm = () => {
                            <label className="block text-sm font-medium mb-1">로스팅 날짜</label>
                            <input 
                                type="date" 
+                               value={dates.roastingDate}
+                               onChange={(e) => handleDateChange('roastingDate', e.target.value)}
                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                            />
                        </div>
@@ -92,6 +187,8 @@ const SimpleCuppingForm = () => {
                            <label className="block text-sm font-medium mb-1">커핑 날짜</label>
                            <input 
                                type="date"
+                               value={dates.cuppingDate}
+                               onChange={(e) => handleDateChange('cuppingDate', e.target.value)}
                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                            />
                        </div>
