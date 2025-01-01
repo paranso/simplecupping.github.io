@@ -1,30 +1,75 @@
+
+
+Start new chat
+Projects
+Starred
+Star projects and chats you use often
+Recents
+(New chat)
+(New chat)
+Simple Coffee Cupping Guide for Beginners
+Lower Back and Sacral Pain Relief
+Identifying Coffee Contaminants Through "Clean Cup" Cupping
+Determining the Most Appropriate Title
+English Sentence Structure Visualizer
+Referring to Employees in English
+View all
+Professional plan
+
+LS
+cw0303@gmail.com
+Help & support
+LS
+
+
+Untitled
+
+
+What can I help you with today?
+
+이 코드에 localStorage 기능을 추가해줘. 
+전체 코드를 알려줘.
+
+선택된 파일 없음
+
+
+3.5 Sonnet
+
+Concise
+Use shift + return for new line
+Message limit reached for Claude 3.5 Sonnet until 1 AM.
+You may still be able to continue on Claude 3.5 Haiku
+Start Claude 3.5 Haiku chat
+
+
+const SimpleCuppingForm = () => { const [scores, setScores] = React.useState({ aroma: 3, acidity: 3, sweetness: 3, body: 3, aftertaste: 3 }); cons
+pasted
+Chat controls
+
+3.5 Sonnet
+Most intelligent model Learn more
+
+Content
+No content added yet
+Add images, PDFs, docs, spreadsheets, and more to summarize, analyze, and query content with Claude.
+Chat styles
+Font
+
+Default
+
+Pasted content
+
+9.18 KB •220 lines
+•
+Formatting may be inconsistent from source
+
 const SimpleCuppingForm = () => {
-   // 현재 선택된 커핑 노트 ID
-   const [currentNoteId, setCurrentNoteId] = React.useState(() => {
-       return localStorage.getItem('currentNoteId') || Date.now().toString();
-   });
-
-   // 저장된 커핑 노트 목록
-   const [savedNotes, setSavedNotes] = React.useState(() => {
-       const saved = localStorage.getItem('savedNotesList');
-       return saved ? JSON.parse(saved) : [];
-   });
-
-   // 마지막 저장 시간
-   const [lastSaved, setLastSaved] = React.useState(null);
-
-   // 알림 상태
-   const [notification, setNotification] = React.useState({ show: false, message: '', type: '' });
-
-   const [scores, setScores] = React.useState(() => {
-       const savedScores = localStorage.getItem(`scores_${currentNoteId}`);
-       return savedScores ? JSON.parse(savedScores) : {
-           aroma: 3,
-           acidity: 3,
-           sweetness: 3,
-           body: 3,
-           aftertaste: 3
-       };
+   const [scores, setScores] = React.useState({
+       aroma: 3,
+       acidity: 3,
+       sweetness: 3,
+       body: 3,
+       aftertaste: 3
    });
 
    const aromaWheel = {
@@ -36,218 +81,198 @@ const SimpleCuppingForm = () => {
        '초콜릿': ['다크초콜릿', '밀크초콜릿', '코코아', '초콜릿시럽', '모카']
    };
 
-   const [selectedAromas, setSelectedAromas] = React.useState(() => {
-       const saved = localStorage.getItem(`aromas_${currentNoteId}`);
-       return saved ? JSON.parse(saved) : [];
-   });
-
+   const [selectedAromas, setSelectedAromas] = React.useState([]);
    const [expandedCategory, setExpandedCategory] = React.useState(null);
-   
-   const [notes, setNotes] = React.useState(() => {
-       return localStorage.getItem(`notes_${currentNoteId}`) || '';
+   const [notes, setNotes] = React.useState('');
+   const [customNotes, setCustomNotes] = React.useState({
+       꽃: '',
+       과일류: '',
+       허브: '',
+       견과류: '',
+       캐러멜: '',
+       초콜릿: ''
    });
+   const [roastingNotes, setRoastingNotes] = React.useState('');
 
-   const [customNotes, setCustomNotes] = React.useState(() => {
-       const saved = localStorage.getItem(`customNotes_${currentNoteId}`);
-       return saved ? JSON.parse(saved) : {
-           꽃: '',
-           과일류: '',
-           허브: '',
-           견과류: '',
-           캐러멜: '',
-           초콜릿: ''
-       };
-   });
-
-   const [roastingNotes, setRoastingNotes] = React.useState(() => {
-       return localStorage.getItem(`roastingNotes_${currentNoteId}`) || '';
-   });
-
-   const [dates, setDates] = React.useState(() => {
-       const saved = localStorage.getItem(`dates_${currentNoteId}`);
-       return saved ? JSON.parse(saved) : {
-           roastingDate: '',
-           cuppingDate: new Date().toISOString().split('T')[0]
-       };
-   });
-
-   // 알림 표시 함수
-   const showNotification = (message, type = 'success') => {
-       setNotification({ show: true, message, type });
-       setTimeout(() => setNotification({ show: false, message: '', type: '' }), 3000);
+   const handleScoreChange = (category, value) => {
+       setScores(prev => ({
+           ...prev,
+           [category]: parseInt(value)
+       }));
    };
 
-   // 현재 데이터 저장
-   const saveCurrentNote = () => {
-       try {
-           const currentTime = new Date().toLocaleString();
-           const noteData = {
-               id: currentNoteId,
-               timestamp: currentTime,
-               title: `커핑 노트 ${new Date(dates.cuppingDate).toLocaleDateString()}`,
-               dates,
-               scores,
-               selectedAromas,
-               customNotes,
-               notes,
-               roastingNotes
-           };
-
-           // 현재 노트 저장
-           localStorage.setItem(`note_${currentNoteId}`, JSON.stringify(noteData));
-
-           // 저장된 노트 목록 업데이트
-           const updatedNotes = savedNotes.filter(note => note.id !== currentNoteId);
-           updatedNotes.push(noteData);
-           localStorage.setItem('savedNotesList', JSON.stringify(updatedNotes));
-           setSavedNotes(updatedNotes);
-
-           setLastSaved(currentTime);
-           showNotification('저장되었습니다.');
-       } catch (error) {
-           showNotification('저장 중 오류가 발생했습니다.', 'error');
-       }
+   const handleAromaSelect = (aroma) => {
+       setSelectedAromas(prev => 
+           prev.includes(aroma)
+               ? prev.filter(a => a !== aroma)
+               : [...prev, aroma]
+       );
    };
 
-   // 새 노트 시작
-   const startNewNote = () => {
-       const newId = Date.now().toString();
-       setCurrentNoteId(newId);
-       localStorage.setItem('currentNoteId', newId);
+   const handleCategoryClick = (category) => {
+       setExpandedCategory(expandedCategory === category ? null : category);
+   };
+
+   const getRecommendation = () => {
+       let recommendations = [];
        
-       // 모든 필드 초기화
-       setScores({
-           aroma: 3,
-           acidity: 3,
-           sweetness: 3,
-           body: 3,
-           aftertaste: 3
-       });
-       setSelectedAromas([]);
-       setNotes('');
-       setCustomNotes({
-           꽃: '',
-           과일류: '',
-           허브: '',
-           견과류: '',
-           캐러멜: '',
-           초콜릿: ''
-       });
-       setRoastingNotes('');
-       setDates({
-           roastingDate: '',
-           cuppingDate: new Date().toISOString().split('T')[0]
-       });
-       
-       showNotification('새로운 커핑 노트가 시작되었습니다.');
-   };
-
-   // 저장된 노트 불러오기
-   const loadNote = (noteId) => {
-       try {
-           const noteData = JSON.parse(localStorage.getItem(`note_${noteId}`));
-           if (noteData) {
-               setCurrentNoteId(noteId);
-               setDates(noteData.dates);
-               setScores(noteData.scores);
-               setSelectedAromas(noteData.selectedAromas);
-               setCustomNotes(noteData.customNotes);
-               setNotes(noteData.notes);
-               setRoastingNotes(noteData.roastingNotes);
-               showNotification('커핑 노트를 불러왔습니다.');
-           }
-       } catch (error) {
-           showNotification('노트를 불러오는 중 오류가 발생했습니다.', 'error');
+       if (scores.acidity > 3) {
+           recommendations.push("참고: 산미가 강한 편입니다. 로스팅 온도를 약간 높이면 산미를 줄일 수 있습니다.");
        }
-   };
-
-   // 노트 삭제
-   const deleteNote = (noteId) => {
-       if (window.confirm('이 커핑 노트를 삭제하시겠습니까?')) {
-           try {
-               localStorage.removeItem(`note_${noteId}`);
-               const updatedNotes = savedNotes.filter(note => note.id !== noteId);
-               localStorage.setItem('savedNotesList', JSON.stringify(updatedNotes));
-               setSavedNotes(updatedNotes);
-               
-               if (currentNoteId === noteId) {
-                   startNewNote();
-               }
-               
-               showNotification('커핑 노트가 삭제되었습니다.');
-           } catch (error) {
-               showNotification('삭제 중 오류가 발생했습니다.', 'error');
-           }
+       if (scores.body < 3) {
+           recommendations.push("참고: 바디감을 높이려면 디벨롭 시간을 조금 더 가져가보세요.");
        }
+       if (scores.sweetness < 3) {
+           recommendations.push("참고: 단맛을 높이려면 첫 크랙 후 시간을 좀 더 가져가보세요.");
+       }
+
+       return recommendations.join(' ');
    };
 
-   // 나머지 기존 코드는 동일...
+   const scoreLabels = {
+       aroma: '향',
+       acidity: '산미',
+       sweetness: '단맛',
+       body: '바디감',
+       aftertaste: '후미'
+   };
 
    return (
        <div className="container mx-auto px-4 py-8 max-w-2xl">
-           {/* 알림 컴포넌트 */}
-           {notification.show && (
-               <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg ${
-                   notification.type === 'error' ? 'bg-red-500' : 'bg-green-500'
-               } text-white`}>
-                   {notification.message}
+           <div className="bg-white rounded-lg shadow-lg p-6">
+               <h1 className="text-2xl font-bold text-center mb-6">커피 커핑 폼</h1>
+               
+               {/* 기본 정보 */}
+               <div className="mb-8">
+                   <h2 className="text-lg font-semibold mb-4">기본 정보</h2>
+                   <div className="grid grid-cols-2 gap-4">
+                       <div>
+                           <label className="block text-sm font-medium mb-1">로스팅 날짜</label>
+                           <input 
+                               type="date" 
+                               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           />
+                       </div>
+                       <div>
+                           <label className="block text-sm font-medium mb-1">커핑 날짜</label>
+                           <input 
+                               type="date"
+                               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           />
+                       </div>
+                   </div>
                </div>
-           )}
 
-           {/* 저장된 노트 목록 */}
-           <div className="mb-6 bg-white rounded-lg shadow-lg p-4">
-               <div className="flex justify-between items-center mb-4">
-                   <h2 className="text-lg font-semibold">저장된 커핑 노트</h2>
-                   <button
-                       onClick={startNewNote}
-                       className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                   >
-                       새 노트
-                   </button>
-               </div>
-               <div className="space-y-2">
-                   {savedNotes.map(note => (
-                       <div key={note.id} className="flex items-center justify-between p-2 border rounded">
-                           <span>{note.title}</span>
-                           <div className="space-x-2">
-                               <button
-                                   onClick={() => loadNote(note.id)}
-                                   className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                               >
-                                   불러오기
-                               </button>
-                               <button
-                                   onClick={() => deleteNote(note.id)}
-                                   className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                               >
-                                   삭제
-                               </button>
+               {/* 평가 항목 */}
+               <div className="mb-8">
+                   <h2 className="text-lg font-semibold mb-4">평가 항목</h2>
+                   {Object.entries(scores).map(([category, value]) => (
+                       <div key={category} className="mb-6">
+                           <label className="block text-sm font-medium mb-2">
+                               {scoreLabels[category]}
+                               <span className="ml-2 text-gray-500">{value}</span>
+                           </label>
+                           <input
+                               type="range"
+                               min="1"
+                               max="5"
+                               value={value}
+                               onChange={(e) => handleScoreChange(category, e.target.value)}
+                               className="w-full mb-1"
+                           />
+                           <div className="flex justify-between text-xs text-gray-500">
+                               <span>약함</span>
+                               <span>강함</span>
                            </div>
                        </div>
                    ))}
                </div>
-           </div>
 
-           <div className="bg-white rounded-lg shadow-lg p-6">
-               <div className="flex justify-between items-center mb-6">
-                   <h1 className="text-2xl font-bold">커피 커핑 폼</h1>
-                   <div className="space-x-4">
-                       <button
-                           onClick={saveCurrentNote}
-                           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                       >
-                           저장
-                       </button>
-                   </div>
+               {/* 아로마 휠 */}
+               <div className="mb-8">
+                   <h2 className="text-lg font-semibold mb-4">향미 특성</h2>
+                   {Object.entries(aromaWheel).map(([category, aromas]) => (
+                       <div key={category} className="mb-2 border rounded">
+                           <button
+                               onClick={() => handleCategoryClick(category)}
+                               className="w-full text-left p-3 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           >
+                               {category}
+                           </button>
+                           {expandedCategory === category && (
+                               <div className="p-3 bg-gray-50">
+                                   <div className="flex flex-wrap gap-2 mb-3">
+                                       {aromas.map(aroma => (
+                                           <button
+                                               key={aroma}
+                                               onClick={() => handleAromaSelect(aroma)}
+                                               className={`px-3 py-1 rounded-full text-sm ${
+                                                   selectedAromas.includes(aroma)
+                                                       ? 'bg-blue-500 text-white'
+                                                       : 'bg-white text-gray-700 border'
+                                               } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                           >
+                                               {aroma}
+                                           </button>
+                                       ))}
+                                   </div>
+                                   <textarea
+                                       value={customNotes[category]}
+                                       onChange={(e) => setCustomNotes(prev => ({
+                                           ...prev,
+                                           [category]: e.target.value
+                                       }))}
+                                       placeholder={`${category}에 대한 세부 평가를 기록하세요...`}
+                                       className="w-full p-2 border rounded h-20 text-sm resize-none"
+                                   />
+                               </div>
+                           )}
+                       </div>
+                   ))}
                </div>
-               
-               {lastSaved && (
-                   <div className="text-sm text-gray-500 mb-4">
-                       마지막 저장: {lastSaved}
+
+               {/* 선택된 향미 표시 */}
+               {selectedAromas.length > 0 && (
+                   <div className="mb-8">
+                       <h3 className="text-sm font-medium mb-2">선택된 향미:</h3>
+                       <div className="flex flex-wrap gap-2">
+                           {selectedAromas.map(aroma => (
+                               <span key={aroma} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
+                                   {aroma}
+                               </span>
+                           ))}
+                       </div>
                    </div>
                )}
 
-               {/* 기존의 나머지 폼 요소들... */}
+               {/* 메모 */}
+               <div className="mb-8">
+                   <h2 className="text-lg font-semibold mb-4">추가 메모</h2>
+                   <div className="bg-white border rounded-lg p-4">
+                       <textarea
+                           value={notes}
+                           onChange={(e) => setNotes(e.target.value)}
+                           placeholder="추가적인 느낌이나 특징을 기록하세요..."
+                           className="w-full h-32 p-0 border-0 focus:outline-none resize-none"
+                       />
+                   </div>
+               </div>
+
+               {/* 로스팅 추천 */}
+               <div>
+                   <h2 className="text-lg font-semibold mb-4">로스팅 추천 방향</h2>
+                   <div className="bg-white border rounded-lg p-4 h-32">
+                       <textarea
+                           value={roastingNotes}
+                           onChange={(e) => setRoastingNotes(e.target.value)}
+                           placeholder="로스팅 추천 방향을 기록하세요..."
+                           className="w-full h-[80%] p-0 border-0 focus:outline-none resize-none"
+                       />
+                       <div className="text-xs text-gray-500 mt-2">
+                           {getRecommendation()}
+                       </div>
+                   </div>
+               </div>
            </div>
        </div>
    );
