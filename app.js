@@ -71,7 +71,7 @@ const SimpleCuppingForm = () => {
                 {/* 기본 정보 */}
                 <div className="mb-8">
                     <h2 className="text-lg font-semibold mb-4">기본 정보</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-1">로스팅 날짜</label>
                             <input 
@@ -170,7 +170,7 @@ const SimpleCuppingForm = () => {
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="추가적인 느낌이나 특징을 기록하세요..."
-                            className="w-full min-h-[100px] p-0 border-0 focus:outline-none resize-none"
+                            className="w-full h-32 p-0 border-0 focus:outline-none resize-none"
                         />
                     </div>
                 </div>
@@ -178,7 +178,7 @@ const SimpleCuppingForm = () => {
                 {/* 로스팅 추천 */}
                 <div>
                     <h2 className="text-lg font-semibold mb-4">로스팅 추천 방향</h2>
-                    <div className="bg-white border rounded-lg p-4">
+                    <div className="bg-white border rounded-lg p-4 h-32">
                         <p className="text-sm">{getRecommendation()}</p>
                     </div>
                 </div>
@@ -187,5 +187,4 @@ const SimpleCuppingForm = () => {
     );
 };
 
-// 컴포넌트를 DOM에 렌더링
 ReactDOM.render(<SimpleCuppingForm />, document.getElementById('root'));
