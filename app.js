@@ -1,5 +1,7 @@
+import React, { useState } from 'react';
+
 const SimpleCuppingForm = () => {
-    const [scores, setScores] = React.useState({
+    const [scores, setScores] = useState({
         aroma: 3,
         acidity: 3,
         sweetness: 3,
@@ -16,9 +18,18 @@ const SimpleCuppingForm = () => {
         '초콜릿': ['다크초콜릿', '밀크초콜릿', '코코아', '초콜릿시럽', '모카']
     };
 
-    const [selectedAromas, setSelectedAromas] = React.useState([]);
-    const [expandedCategory, setExpandedCategory] = React.useState(null);
-    const [notes, setNotes] = React.useState('');
+    const [selectedAromas, setSelectedAromas] = useState([]);
+    const [expandedCategory, setExpandedCategory] = useState(null);
+    const [notes, setNotes] = useState('');
+    const [customNotes, setCustomNotes] = useState({
+        꽃: '',
+        과일류: '',
+        허브: '',
+        견과류: '',
+        캐러멜: '',
+        초콜릿: ''
+    });
+    const [roastingNotes, setRoastingNotes] = useState('');
 
     const handleScoreChange = (category, value) => {
         setScores(prev => ({
@@ -43,13 +54,13 @@ const SimpleCuppingForm = () => {
         let recommendations = [];
         
         if (scores.acidity > 3) {
-            recommendations.push("산미가 강한 편입니다. 로스팅 온도를 약간 높이면 산미를 줄일 수 있습니다.");
+            recommendations.push("참고: 산미가 강한 편입니다. 로스팅 온도를 약간 높이면 산미를 줄일 수 있습니다.");
         }
         if (scores.body < 3) {
-            recommendations.push("바디감을 높이려면 디벨롭 시간을 조금 더 가져가보세요.");
+            recommendations.push("참고: 바디감을 높이려면 디벨롭 시간을 조금 더 가져가보세요.");
         }
         if (scores.sweetness < 3) {
-            recommendations.push("단맛을 높이려면 첫 크랙 후 시간을 좀 더 가져가보세요.");
+            recommendations.push("참고: 단맛을 높이려면 첫 크랙 후 시간을 좀 더 가져가보세요.");
         }
 
         return recommendations.join(' ');
@@ -127,7 +138,7 @@ const SimpleCuppingForm = () => {
                             </button>
                             {expandedCategory === category && (
                                 <div className="p-3 bg-gray-50">
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex flex-wrap gap-2 mb-3">
                                         {aromas.map(aroma => (
                                             <button
                                                 key={aroma}
@@ -142,6 +153,15 @@ const SimpleCuppingForm = () => {
                                             </button>
                                         ))}
                                     </div>
+                                    <textarea
+                                        value={customNotes[category]}
+                                        onChange={(e) => setCustomNotes(prev => ({
+                                            ...prev,
+                                            [category]: e.target.value
+                                        }))}
+                                        placeholder={`${category}에 대한 세부 평가를 기록하세요...`}
+                                        className="w-full p-2 border rounded h-20 text-sm resize-none"
+                                    />
                                 </div>
                             )}
                         </div>
@@ -179,7 +199,15 @@ const SimpleCuppingForm = () => {
                 <div>
                     <h2 className="text-lg font-semibold mb-4">로스팅 추천 방향</h2>
                     <div className="bg-white border rounded-lg p-4 h-32">
-                        <p className="text-sm">{getRecommendation()}</p>
+                        <textarea
+                            value={roastingNotes}
+                            onChange={(e) => setRoastingNotes(e.target.value)}
+                            placeholder="로스팅 추천 방향을 기록하세요..."
+                            className="w-full h-[80%] p-0 border-0 focus:outline-none resize-none"
+                        />
+                        <div className="text-xs text-gray-500 mt-2">
+                            {getRecommendation()}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -187,4 +215,4 @@ const SimpleCuppingForm = () => {
     );
 };
 
-ReactDOM.render(<SimpleCuppingForm />, document.getElementById('root'));
+export default SimpleCuppingForm;
